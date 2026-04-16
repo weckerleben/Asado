@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Asado 🔥</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@300;400;500&display=swap');
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --fire-1: #ff4500;
+      --fire-2: #ff7700;
+      --fire-3: #ffaa00;
+      --ember: #ff2200;
+      --smoke: rgba(180,160,140,0.18);
+      --dark: #1a0a00;
+      --surface: #1e0e02;
+      --card: rgba(255,255,255,0.04);
+      --text: #f5e6d0;
+      --muted: #b89a7a;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--dark);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── CANVAS FIRE ─────────────────────────────── */
+    #fireCanvas {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.55;
+    }
+
+    /* ── HERO ────────────────────────────────────── */
+    .hero {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 2rem 1.5rem 4rem;
+      z-index: 1;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 80% 60% at 50% 70%,
+        rgba(255,100,0,0.18) 0%,
+        rgba(26,10,0,0.0) 70%);
+      pointer-events: none;
+    }
+
+    .smoke-layer {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .smoke {
+      position: absolute;
+      bottom: 0;
+      width: clamp(80px, 12vw, 140px);
+      border-radius: 50%;
+      background: var(--smoke);
+      filter: blur(28px);
+      animation: smokeRise var(--dur, 9s) ease-in infinite;
+      animation-delay: var(--delay, 0s);
+      opacity: 0;
+    }
+
+    @keyframes smokeRise {
+      0%   { transform: translateY(0) scale(1);    opacity: 0; }
+      15%  { opacity: 0.8; }
+      80%  { opacity: 0.3; }
+      100% { transform: translateY(-80vh) scale(3); opacity: 0; }
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(255,119,0,0.15);
+      border: 1px solid rgba(255,119,0,0.35);
+      border-radius: 100px;
+      padding: 0.4rem 1.1rem;
+      font-size: 0.78rem;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--fire-2);
+      margin-bottom: 1.6rem;
+      backdrop-filter: blur(6px);
+    }
+
+    h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(3.8rem, 14vw, 9rem);
+      font-weight: 900;
+      line-height: 0.92;
+      letter-spacing: -0.02em;
+      background: linear-gradient(160deg, #fff8f0 10%, var(--fire-3) 50%, var(--fire-1) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      filter: drop-shadow(0 0 40px rgba(255,120,0,0.5));
+      animation: pulse 4s ease-in-out infinite alternate;
+    }
+
+    @keyframes pulse {
+      from { filter: drop-shadow(0 0 30px rgba(255,120,0,0.4)); }
+      to   { filter: drop-shadow(0 0 60px rgba(255,60,0,0.7)); }
+    }
+
+    .subtitle {
+      margin-top: 1.2rem;
+      font-size: clamp(1rem, 3vw, 1.3rem);
+      font-weight: 300;
+      color: var(--muted);
+      letter-spacing: 0.06em;
+    }
+
+    .cta-scroll {
+      margin-top: 2.5rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.4rem;
+      color: var(--muted);
+      font-size: 0.8rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      animation: bounce 2.4s ease-in-out infinite;
+    }
+
+    .cta-scroll svg { opacity: 0.6; }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50%       { transform: translateY(8px); }
+    }
+
+    /* ── INFO SECTION ────────────────────────────── */
+    .info {
+      position: relative;
+      z-index: 1;
+      padding: 0 1.5rem 5rem;
+      max-width: 680px;
+      margin: 0 auto;
+    }
+
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 3rem;
+      color: rgba(255,119,0,0.5);
+      font-size: 1.1rem;
+    }
+    .divider::before, .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255,119,0,0.4), transparent);
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2.5rem;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 18px;
+      padding: 1.6rem 1.4rem;
+      backdrop-filter: blur(12px);
+      transition: transform 0.3s, border-color 0.3s;
+    }
+    .card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(255,119,0,0.3);
+    }
+
+    .card-icon {
+      font-size: 2rem;
+      margin-bottom: 0.7rem;
+      display: block;
+    }
+
+    .card-label {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--fire-2);
+      margin-bottom: 0.3rem;
+    }
+
+    .card-value {
+      font-size: 1.05rem;
+      font-weight: 500;
+      color: var(--text);
+      line-height: 1.4;
+    }
+
+    /* ── MENU ────────────────────────────────────── */
+    .menu-section {
+      background: rgba(255,255,255,0.025);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 22px;
+      padding: 2rem 1.8rem;
+      margin-bottom: 2.5rem;
+    }
+
+    .menu-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--fire-3);
+      margin-bottom: 1.4rem;
+    }
+
+    .menu-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+    }
+
+    .menu-list li {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      font-size: 0.95rem;
+      color: var(--text);
+      opacity: 0;
+      transform: translateX(-16px);
+      transition: opacity 0.5s, transform 0.5s;
+    }
+    .menu-list li.visible {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    .menu-list .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--fire-1);
+      flex-shrink: 0;
+      box-shadow: 0 0 6px var(--fire-1);
+    }
+
+    /* ── RSVP BUTTON ─────────────────────────────── */
+    .rsvp-wrap {
+      text-align: center;
+    }
+
+    .rsvp-btn {
+      display: inline-block;
+      background: linear-gradient(135deg, var(--fire-1), var(--fire-2));
+      color: #fff;
+      font-weight: 600;
+      font-size: 1rem;
+      letter-spacing: 0.05em;
+      padding: 1rem 2.8rem;
+      border-radius: 100px;
+      text-decoration: none;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 0 30px rgba(255,80,0,0.45);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .rsvp-btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 50px rgba(255,80,0,0.7);
+    }
+
+    .rsvp-note {
+      margin-top: 0.9rem;
+      font-size: 0.78rem;
+      color: var(--muted);
+      letter-spacing: 0.05em;
+    }
+
+    /* ── FOOTER ──────────────────────────────────── */
+    footer {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      padding: 2rem;
+      color: rgba(255,255,255,0.2);
+      font-size: 0.75rem;
+      letter-spacing: 0.08em;
+    }
+  </style>
+</head>
+<body>
+
+<canvas id="fireCanvas"></canvas>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="smoke-layer" id="smokeLayer"></div>
+
+  <div class="badge">
+    <span>🔥</span> Te esperamos
+  </div>
+
+  <h1>ASADO</h1>
+  <p class="subtitle">Una tarde de fuego, amigos y buena carne</p>
+
+  <div class="cta-scroll">
+    <span>Ver detalles</span>
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <polyline points="6 9 12 15 18 9"/>
+    </svg>
+  </div>
+</section>
+
+<!-- INFO -->
+<section class="info">
+  <div class="divider">🥩</div>
+
+  <div class="cards">
+    <div class="card">
+      <span class="card-icon">📅</span>
+      <div class="card-label">Fecha</div>
+      <div class="card-value">Sábado<br>3 de mayo, 2025</div>
+    </div>
+    <div class="card">
+      <span class="card-icon">🕑</span>
+      <div class="card-label">Hora</div>
+      <div class="card-value">A partir de<br>las 13:00 hs</div>
+    </div>
+    <div class="card">
+      <span class="card-icon">📍</span>
+      <div class="card-label">Lugar</div>
+      <div class="card-value">Casa de<br>los anfitriones</div>
+    </div>
+  </div>
+
+  <!-- MENU -->
+  <div class="menu-section">
+    <div class="menu-title">¿Qué hay en la parrilla?</div>
+    <ul class="menu-list" id="menuList">
+      <li><span class="dot"></span>Achuras y chorizos de entrada</li>
+      <li><span class="dot"></span>Tira de asado y vacío</li>
+      <li><span class="dot"></span>Entraña y mollejas</li>
+      <li><span class="dot"></span>Ensaladas frescas</li>
+      <li><span class="dot"></span>Pan casero</li>
+      <li><span class="dot"></span>Vino, birra y fernet de postre</li>
+    </ul>
+  </div>
+
+  <!-- RSVP -->
+  <div class="rsvp-wrap">
+    <a href="mailto:?subject=Confirmo%20asistencia%20al%20Asado" class="rsvp-btn">
+      Confirmar asistencia
+    </a>
+    <p class="rsvp-note">Avisanos si venís para calcular bien la carne 🥩</p>
+  </div>
+</section>
+
+<footer>Hecho con fuego y amor &nbsp;🔥</footer>
+
+<script>
+/* ── EMBERS CANVAS ──────────────────────────────────────── */
+(function () {
+  const canvas = document.getElementById('fireCanvas');
+  const ctx = canvas.getContext('2d');
+  let W, H, particles = [];
+
+  function resize() {
+    W = canvas.width  = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  class Particle {
+    constructor() { this.reset(true); }
+    reset(init) {
+      this.x  = Math.random() * W;
+      this.y  = init ? Math.random() * H : H + 10;
+      this.vx = (Math.random() - 0.5) * 0.8;
+      this.vy = -(Math.random() * 1.5 + 0.4);
+      this.r  = Math.random() * 2.5 + 0.5;
+      this.life = 0;
+      this.maxLife = Math.random() * 220 + 100;
+      const hot = Math.random();
+      this.color = hot > 0.55
+        ? `rgba(255,${Math.floor(Math.random()*80+40)},0,`
+        : `rgba(255,${Math.floor(Math.random()*40+180)},0,`;
+    }
+    update() {
+      this.x  += this.vx + Math.sin(this.life * 0.04) * 0.5;
+      this.y  += this.vy;
+      this.vy -= 0.003;
+      this.life++;
+      if (this.life > this.maxLife) this.reset(false);
+    }
+    draw() {
+      const prog = this.life / this.maxLife;
+      const alpha = Math.sin(prog * Math.PI) * 0.8;
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.r * (1 - prog * 0.4), 0, Math.PI * 2);
+      ctx.fillStyle = this.color + alpha.toFixed(2) + ')';
+      ctx.fill();
+    }
+  }
+
+  for (let i = 0; i < 160; i++) particles.push(new Particle());
+
+  function loop() {
+    ctx.clearRect(0, 0, W, H);
+    particles.forEach(p => { p.update(); p.draw(); });
+    requestAnimationFrame(loop);
+  }
+  loop();
+})();
+
+/* ── SMOKE COLUMNS ──────────────────────────────────────── */
+(function () {
+  const layer = document.getElementById('smokeLayer');
+  const cols  = [15, 30, 50, 65, 80];
+  cols.forEach((pct, i) => {
+    const el = document.createElement('div');
+    el.className = 'smoke';
+    const h = 40 + Math.random() * 80;
+    el.style.cssText = `
+      left:${pct}%;
+      width:${80 + i * 20}px;
+      height:${h}px;
+      --dur:${8 + i * 1.4}s;
+      --delay:${i * 1.7}s;
+    `;
+    layer.appendChild(el);
+  });
+})();
+
+/* ── MENU REVEAL ON SCROLL ──────────────────────────────── */
+(function () {
+  const items = document.querySelectorAll('#menuList li');
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        const li = Array.from(items);
+        li.forEach((item, idx) => {
+          setTimeout(() => item.classList.add('visible'), idx * 110);
+        });
+        io.disconnect();
+      }
+    });
+  }, { threshold: 0.2 });
+  io.observe(document.getElementById('menuList'));
+})();
+</script>
+</body>
+</html>
